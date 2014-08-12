@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Reveal</string>
+    <string name="tap_for_options">Tap for options</string>
+    <string name="game_over">Game over</string>
+    <string name="great_job">Great job!</string>
+    <string name="score_summary">Score: %1$d/%2$d</string>
+    <string name="start_presentation">Start presentation</string>
+    <string name="instructions">Instructions</string>
+    <string-array name="tutorial_phrases">
+        <item>Swipe forward to go to next slide</item>
+        <item>Swipe Backward to go to previous slide</item>
+        <item>Click to get some informations</item>
+    </string-array>
+    <string-array name="phrases">
+        <item>Setting an alarm clock</item>
+        <item>Playing charades</item>
+        <item>Soaking dentures</item>
+        <item>Breaking up with someone</item>
+        <item>Germinating a seed</item>
+        <item>Digging a ditch</item>
+        <item>Talking to a telemarketer</item>
+        <item>Watching the big game</item>
+        <item>Graduating from college</item>
+        <item>Getting a tattoo</item>
+        <item>Filming Bigfoot</item>
+        <item>Grilling a hamburger</item>
+        <item>Winning an eating contest</item>
+        <item>Chopping down a tree</item>
+        <item>Hanggliding</item>
+        <item>Walking a tightrope</item>
+        <item>Feeding a cat</item>
+        <item>Cleaning a litter box</item>
+        <item>Walking a dog</item>
+        <item>Drinking a love potion</item>
+        <item>Smelting precious metals</item>
+        <item>Designing good Glassware</item>
+        <item>Ordering a pizza</item>
+        <item>Scrolling a mouse wheel</item>
+        <item>Making chocolate chip cookies</item>
+        <item>Riding a bicycle</item>
+        <item>Shopping at the mall</item>
+        <item>Sending a text message</item>
+        <item>Looking through a telescope</item>
+        <item>Flinging pizza dough</item>
+    </string-array>
+
+</resources>
