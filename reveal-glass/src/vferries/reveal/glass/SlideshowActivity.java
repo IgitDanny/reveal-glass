@@ -2,6 +2,7 @@ package vferries.reveal.glass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Executors;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -16,10 +17,11 @@ import android.os.Bundle;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
-
 import vferries.reveal.glass.R;
+
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
 
@@ -27,6 +29,9 @@ import com.google.android.glass.touchpad.GestureDetector;
  * The concrete, non-tutorial implementation of the application.
  */
 public class SlideshowActivity extends Activity {
+	private static String BASE_URL = "http://192.168.0.42:8080/";
+	
+	
     /** The Unicode character for the hollow circle representing a phrase not yet guessed. */
     private static final char HOLLOW_CIRCLE = '\u25cb';
 
@@ -61,26 +66,7 @@ public class SlideshowActivity extends Activity {
         new GestureDetector(this).setBaseListener(mBaseListener);
         mPhraseFlipper = (ViewFlipper) findViewById(R.id.phrase_flipper);
         mGameState = (TextView) findViewById(R.id.slides_state);
-		try {
-			HttpClient httpclient = new DefaultHttpClient();
-		    HttpResponse response = httpclient.execute(new HttpGet("http://localhost:8080/init"));
-		    StatusLine statusLine = response.getStatusLine();
-		    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-		        ByteArrayOutputStream out = new ByteArrayOutputStream();
-		        response.getEntity().writeTo(out);
-		        out.close();
-		        totalSlides = Integer.parseInt(out.toString());
-		        currentSlideIndex = 1;
-		    } else{
-		        //Closes the connection.
-		        response.getEntity().getContent().close();
-		        throw new IOException(statusLine.getReasonPhrase());
-		    }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-        updateDisplay();
+		makeNetworkCall("init");
     }
 
     private void updateDisplay() {
@@ -129,44 +115,39 @@ public class SlideshowActivity extends Activity {
     }
 
 	private void nextSlide() {
-		try {
-			HttpClient httpclient = new DefaultHttpClient();
-		    HttpResponse response = httpclient.execute(new HttpGet("http://localhost:8080/next"));
-		    StatusLine statusLine = response.getStatusLine();
-		    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-		        ByteArrayOutputStream out = new ByteArrayOutputStream();
-		        response.getEntity().writeTo(out);
-		        out.close();
-		        currentPhrase = out.toString();
-		        currentSlideIndex++;
-		    } else{
-		        //Closes the connection.
-		        response.getEntity().getContent().close();
-		        throw new IOException(statusLine.getReasonPhrase());
-		    }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		makeNetworkCall("next");
 	}
 
 	private void previousSlide() {
-		try {
-			HttpClient httpclient = new DefaultHttpClient();
-		    HttpResponse response = httpclient.execute(new HttpGet("http://localhost:8080/next"));
-		    StatusLine statusLine = response.getStatusLine();
-		    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
-		        ByteArrayOutputStream out = new ByteArrayOutputStream();
-		        response.getEntity().writeTo(out);
-		        out.close();
-		        currentPhrase = out.toString();
-		        currentSlideIndex--;
-		    } else{
-		        //Closes the connection.
-		        response.getEntity().getContent().close();
-		        throw new IOException(statusLine.getReasonPhrase());
-		    }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		makeNetworkCall("previous");
+	}
+	
+	private void makeNetworkCall(final String action) {
+		Executors.newSingleThreadExecutor().submit(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					HttpClient httpclient = new DefaultHttpClient();
+				    HttpResponse response = httpclient.execute(new HttpGet(BASE_URL + action));
+				    StatusLine statusLine = response.getStatusLine();
+				    if(statusLine.getStatusCode() == HttpStatus.SC_OK){
+				        ByteArrayOutputStream out = new ByteArrayOutputStream();
+				        response.getEntity().writeTo(out);
+				        out.close();
+				        currentPhrase = out.toString();
+				        Log.e("MESSAGE RECEIVED", currentPhrase);
+				        //TODO Mettre à jour le slide courant currentSlideIndex
+				        //TODO Mettre à jour le nombre de slides totalSlides
+				        updateDisplay();
+				    } else{
+				        //Closes the connection.
+				        response.getEntity().getContent().close();
+				        throw new IOException(statusLine.getReasonPhrase());
+				    }
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 }
