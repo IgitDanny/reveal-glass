@@ -1,4 +1,4 @@
-package vferries;
+package vferries.reveal.glass;
 
 import java.io.Serializable;
 import java.util.List;

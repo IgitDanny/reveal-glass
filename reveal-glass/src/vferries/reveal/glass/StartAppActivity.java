@@ -1,7 +1,7 @@
-package vferries;
+package vferries.reveal.glass;
 
 import com.google.android.glass.media.Sounds;
-import com.google.android.glass.sample.charades.R;
+import vferries.reveal.glass.R;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
 

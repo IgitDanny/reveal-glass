@@ -1,4 +1,4 @@
-package vferries;
+package vferries.reveal.glass;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,7 +19,7 @@ import android.text.style.ForegroundColorSpan;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 
-import com.google.android.glass.sample.charades.R;
+import vferries.reveal.glass.R;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
 
