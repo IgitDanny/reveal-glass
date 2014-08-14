@@ -27,7 +27,7 @@
     }
     var acknowledge = {
       totalSlides: nbSlides,
-      slideNumber: Reveal.getIndices().h + Reveal.getIndices().v,
+      slideNumber: getCurrentSlideNumber(),
       message: note
     };
     post('ack', JSON.stringify(acknowledge), ackAndListen);

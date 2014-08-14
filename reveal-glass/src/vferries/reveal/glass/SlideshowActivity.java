@@ -33,7 +33,6 @@ import com.google.android.glass.touchpad.GestureDetector;
 public class SlideshowActivity extends Activity {
 	private static String BASE_URL = "http://192.168.0.42:8080/";
 	
-	
     /** The Unicode character for the hollow circle representing a phrase not yet guessed. */
     private static final char HOLLOW_CIRCLE = '\u25cb';
 
@@ -87,10 +86,6 @@ public class SlideshowActivity extends Activity {
     private CharSequence buildScoreBar() {
         SpannableStringBuilder builder = new SpannableStringBuilder();
         for (int i = 0; i < totalSlides; i++) {
-            if (i > 0) {
-                builder.append(' ');
-            }
-
             if (i == currentSlideIndex) {
                 builder.append(HOLLOW_CIRCLE);
                 builder.setSpan(new ForegroundColorSpan(CURRENT_PHRASE_COLOR),
@@ -113,10 +108,10 @@ public class SlideshowActivity extends Activity {
             case TAP:
                 break;
             case SWIPE_RIGHT:
-                previousSlide();
+                nextSlide();
                 break;
             case SWIPE_LEFT:
-                nextSlide();
+                previousSlide();
                 break;
             default:
             	break;
@@ -124,10 +119,12 @@ public class SlideshowActivity extends Activity {
     }
 
 	private void nextSlide() {
+		mPhraseFlipper.showNext();
 		makeNetworkCall("next");
 	}
 
 	private void previousSlide() {
+		mPhraseFlipper.showPrevious();
 		makeNetworkCall("previous");
 	}
 	
@@ -146,7 +143,7 @@ public class SlideshowActivity extends Activity {
 				        String result = out.toString();
 				        Log.e("MESSAGE RECEIVED", result);
 				        JSONObject obj = new JSONObject(result);
-				        currentPhrase = obj.getString("message");
+				        currentPhrase = obj.getString("message").trim();
 				        currentSlideIndex = obj.getInt("slideNumber");
 				        totalSlides = obj.getInt("totalSlides");
 				        SlideshowActivity.this.runOnUiThread(new Runnable() {

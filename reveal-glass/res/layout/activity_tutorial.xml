@@ -36,7 +36,7 @@
             android:layout_marginLeft="@dimen/card_margin"
             android:layout_marginRight="@dimen/card_margin"
             android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             />
 
         <TextView
@@ -47,7 +47,7 @@
             android:layout_marginLeft="@dimen/card_margin"
             android:layout_marginRight="@dimen/card_margin"
             android:gravity="center"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             />
 
     </ViewFlipper>
