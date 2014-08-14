@@ -32,8 +32,6 @@
     };
     post('ack', JSON.stringify(acknowledge), ackAndListen);
   }
-
-  console.log('Listen...');
   post('listen', null, ackAndListen);
 
   function getCurrentSlideNumber() {

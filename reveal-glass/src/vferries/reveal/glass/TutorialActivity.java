@@ -220,12 +220,17 @@ public class TutorialActivity extends Activity {
     protected void handleGameGesture(Gesture gesture) {
         int phraseIndex = getCharadesModel().getCurrentPhraseIndex();
         switch (gesture) {
-            case TAP:
-                if (phraseIndex == 2) {
-                    score();
-                    finish();
-                }
-                break;
+        	case TWO_TAP:
+	            if (phraseIndex == 3) {
+	                score();
+	                finish();
+	            }
+	            break;
+        	case TAP:
+	            if (phraseIndex == 2) {
+	                pass();
+	            }
+	            break;
             case SWIPE_LEFT:
             	if (phraseIndex == 1) {
             		pass();

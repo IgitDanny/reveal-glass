@@ -19,13 +19,17 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 import vferries.reveal.glass.R;
 
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.google.android.glass.view.WindowUtils;
 
 /**
  * The concrete, non-tutorial implementation of the application.
@@ -39,6 +43,8 @@ public class SlideshowActivity extends Activity {
     /** A light blue color applied to the circle representing the current phrase. */
     private static final int CURRENT_PHRASE_COLOR = Color.rgb(0x34, 0xa7, 0xff);
 
+    private boolean voiceMenuEnabled;
+
     /** Listener for tap and swipe gestures during the game. */
     private final GestureDetector.BaseListener mBaseListener = new GestureDetector.BaseListener() {
         @Override
@@ -51,7 +57,7 @@ public class SlideshowActivity extends Activity {
     private String currentPhrase;
 
     /** View flipper with two views used to provide the flinging animations between phrases. */
-    private ViewFlipper mPhraseFlipper;
+    private ViewFlipper phraseFlipper;
 
     /** TextView containing the dots that represent the scored/unscored phrases in the game. */
     private TextView mGameState;
@@ -65,13 +71,57 @@ public class SlideshowActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(WindowUtils.FEATURE_VOICE_COMMANDS);
+        getWindow().invalidatePanelMenu(WindowUtils.FEATURE_VOICE_COMMANDS);
         setContentView(R.layout.activity_slideshow);
+        voiceMenuEnabled = false;
         mGestureDetector = new GestureDetector(this).setBaseListener(mBaseListener);
-        mPhraseFlipper = (ViewFlipper) findViewById(R.id.phrase_flipper);
+        phraseFlipper = (ViewFlipper) findViewById(R.id.phrase_flipper);
         mGameState = (TextView) findViewById(R.id.slides_state);
 		makeNetworkCall("init");
     }
 
+    @Override
+    public boolean onCreatePanelMenu(int featureId, Menu menu) {
+        if (featureId == WindowUtils.FEATURE_VOICE_COMMANDS) {
+            getMenuInflater().inflate(R.menu.main, menu);
+            return true;
+        }
+        return super.onCreatePanelMenu(featureId, menu);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        if (featureId == WindowUtils.FEATURE_VOICE_COMMANDS) {
+            switch (item.getItemId()) {
+                case R.id.next:
+                    nextSlide();
+                	break;
+                case R.id.previous:
+                	previousSlide();
+                    break;
+                default:
+                    return true;
+            }
+            return true;
+        }
+        return super.onMenuItemSelected(featureId, item);
+    }
+    
+    @Override
+    public boolean onPreparePanel(int featureId, View view, Menu menu) {
+        if (featureId == WindowUtils.FEATURE_VOICE_COMMANDS) {
+            return voiceMenuEnabled;
+        }
+        return super.onPreparePanel(featureId, view, menu);
+    }
+    
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
         return mGestureDetector.onMotionEvent(event);
@@ -100,12 +150,14 @@ public class SlideshowActivity extends Activity {
     
     /** Returns the {@code TextView} inside the flipper that is currently on-screen. */
     private TextView getCurrentTextView() {
-        return (TextView) mPhraseFlipper.getCurrentView();
+        return (TextView) phraseFlipper.getCurrentView();
     }
 
 	protected void handleGameGesture(Gesture gesture) {
         switch (gesture) {
             case TAP:
+            	voiceMenuEnabled = !voiceMenuEnabled;
+                getWindow().invalidatePanelMenu(WindowUtils.FEATURE_VOICE_COMMANDS);
                 break;
             case SWIPE_RIGHT:
                 nextSlide();
@@ -113,18 +165,22 @@ public class SlideshowActivity extends Activity {
             case SWIPE_LEFT:
                 previousSlide();
                 break;
+            case TWO_TAP:
+            	voiceMenuEnabled = !voiceMenuEnabled;
+                getWindow().invalidatePanelMenu(WindowUtils.FEATURE_VOICE_COMMANDS);
+            	break;
             default:
             	break;
         }
     }
 
 	private void nextSlide() {
-		mPhraseFlipper.showNext();
+		phraseFlipper.showNext();
 		makeNetworkCall("next");
 	}
 
 	private void previousSlide() {
-		mPhraseFlipper.showPrevious();
+		phraseFlipper.showPrevious();
 		makeNetworkCall("previous");
 	}
 	
