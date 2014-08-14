@@ -10,6 +10,7 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.graphics.Color;
@@ -18,6 +19,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 import vferries.reveal.glass.R;
@@ -59,14 +61,21 @@ public class SlideshowActivity extends Activity {
 
 	private int currentSlideIndex;
 
+	private GestureDetector mGestureDetector;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_slideshow);        
-        new GestureDetector(this).setBaseListener(mBaseListener);
+        setContentView(R.layout.activity_slideshow);
+        mGestureDetector = new GestureDetector(this).setBaseListener(mBaseListener);
         mPhraseFlipper = (ViewFlipper) findViewById(R.id.phrase_flipper);
         mGameState = (TextView) findViewById(R.id.slides_state);
 		makeNetworkCall("init");
+    }
+
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        return mGestureDetector.onMotionEvent(event);
     }
 
     private void updateDisplay() {
@@ -134,11 +143,18 @@ public class SlideshowActivity extends Activity {
 				        ByteArrayOutputStream out = new ByteArrayOutputStream();
 				        response.getEntity().writeTo(out);
 				        out.close();
-				        currentPhrase = out.toString();
-				        Log.e("MESSAGE RECEIVED", currentPhrase);
-				        //TODO Mettre à jour le slide courant currentSlideIndex
-				        //TODO Mettre à jour le nombre de slides totalSlides
-				        updateDisplay();
+				        String result = out.toString();
+				        Log.e("MESSAGE RECEIVED", result);
+				        JSONObject obj = new JSONObject(result);
+				        currentPhrase = obj.getString("message");
+				        currentSlideIndex = obj.getInt("slideNumber");
+				        totalSlides = obj.getInt("totalSlides");
+				        SlideshowActivity.this.runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+						        updateDisplay();
+							}
+						});
 				    } else{
 				        //Closes the connection.
 				        response.getEntity().getContent().close();

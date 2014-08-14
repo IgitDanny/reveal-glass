@@ -2,35 +2,36 @@ package vferries;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.stream.Stream;
 
 import net.codestory.http.WebServer;
-import net.codestory.http.payload.Payload;
 
 public class RevealServer {
-	private static BlockingQueue<Acknowledge> queue = new ArrayBlockingQueue<>(1);
-	private static BlockingQueue<String> commands = new ArrayBlockingQueue<>(1);
+	private static BlockingQueue<String> queue = new ArrayBlockingQueue<>(5);
+	private static BlockingQueue<String> commands = new ArrayBlockingQueue<>(5);
 	
 	public static void main(String[] args) {
 		new WebServer(routes -> routes.
-			    get("/init", sendCommand("init")).
-			    get("/next", sendCommand("next")).
-			    get("/previous", sendCommand("previous")).
-			    get("/listen", Stream.generate(RevealServer::waitForCommand)).
+			    get("/init", () -> sendCommand("init")).
+			    get("/next", () -> sendCommand("next")).
+			    get("/previous", () -> sendCommand("previous")).
+			    post("/listen", () -> waitForCommand()).
 			    post("/ack", context -> {
-			    	  Acknowledge ack = context.contentAs(Acknowledge.class);
 			    	  try {
-						queue.put(ack);
+						queue.put(context.get("data"));
+						return waitForCommand();
 			    	  } catch (Exception e) {
 			    	  }
-			    	  return Payload.created();
+			    	  return null;
+			    	})
+			    	.filter((uri, context, next) -> {
+			    		System.out.println(uri);
+			    		return next.get().withAllowOrigin("*");	
 			    	})
 			).start();
 	}
 
-	private static Acknowledge sendCommand(String command) {
-		System.out.println("Received " + command);
-		Acknowledge ack = null;
+	private static String sendCommand(String command) {
+		String ack = null;
 		try {
 			commands.put(command);
 			ack = queue.take();
@@ -41,11 +42,12 @@ public class RevealServer {
 	}
 
 	public static String waitForCommand() {
+		String command = null;
 		try {
-			return commands.take();
+			command = commands.take();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return "";
+		return command;
 	}
 }
